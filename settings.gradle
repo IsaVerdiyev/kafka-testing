@@ -1,0 +1,4 @@
+include('kafka-idempotancy-test-producer')
+include('kafka-idempotancy-test-consumer')
+
+

@@ -1,0 +1,117 @@
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+}
+
+
+plugins {
+    id 'org.springframework.boot' version "$springBootVersion"
+    id 'io.spring.dependency-management' version "$springDependencyVersion"
+    id 'java'
+    id "org.sonarqube" version "$sonarqubeVersion"
+    id 'jacoco'
+    id 'checkstyle'
+}
+
+checkstyle {
+    toolVersion = "$checkstyleToolVersion"
+    configFile = file("${rootProject.projectDir}/checkstyle/checkstyle.xml")
+    ignoreFailures = false
+}
+
+tasks.withType(Checkstyle) {
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
+}
+
+group = 'isa.learning'
+version = "$projectVersion"
+sourceCompatibility = "$sourceCompatibility"
+
+repositories {
+    mavenCentral()
+}
+
+compileJava {
+    options.compilerArgs += "-Amapstruct.defaultComponentModel=spring"
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    implementation("net.logstash.logback:logstash-logback-encoder:${logbackEncoderVersion}") {
+        exclude group: 'ch.qos.logback', module: 'logback-core'
+    }
+    implementation 'ch.qos.logback:logback-classic'
+
+    implementation group: 'org.mapstruct', name: 'mapstruct', version: "$mapstructVersion"
+    annotationProcessor group: 'org.mapstruct', name: 'mapstruct-processor', version: "$mapstructProcessorVersion"
+
+    implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: "$swaggerVersion"
+    implementation group: 'io.springfox', name: 'springfox-swagger2', version: "$swaggerVersion"
+
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: "$validationVersion"
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: "$starterOpenFeign"
+    implementation group: 'io.github.openfeign', name: 'feign-core', version: "$okHttpVersion"
+    implementation "io.github.openfeign:feign-okhttp:$okHttpVersion"
+    implementation "io.github.openfeign:feign-gson:$gsonVersion"
+
+    implementation "org.springframework.kafka:spring-kafka:$kafkaVersion"
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+
+    // https://mvnrepository.com/artifact/org.apache.kafka/kafka-streams
+    implementation group: 'org.apache.kafka', name: 'kafka-streams', version: '3.0.0'
+    // https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients
+    implementation group: 'org.apache.kafka', name: 'kafka-clients', version: '3.0.0'
+
+
+    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-zipkin', version: "$starterSleuthZipkin"
+    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-sleuth', version: "$starterSleuthVersion"
+
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    implementation "junit:junit:$junitVersion"
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testCompile group: 'org.powermock', name: 'powermock-api-mockito2', version: "$powerMockVersion"
+
+    //for removing 'unknown enum constant When.MAYBE...' warnings on build
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${releaseTrainVersion}"
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jacoco {
+    toolVersion = "0.8.5"
+    reportsDir = file("build/reports/jacoco")
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled false
+    }
+}
+
+bootJar {
+    archiveName 'app.jar'
+}

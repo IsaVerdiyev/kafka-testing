@@ -1,0 +1,72 @@
+server:
+  port: ${SERVER_PORT_CONSUMER:8080}
+  servlet:
+    context-path: /kafka-idempontancy-test-consumer
+spring:
+  application:
+    name: kafka-idempontancy-test-consumer
+  main:
+    banner-mode: "off"
+  sleuth:
+    sampler:
+      probability: 1.0
+    log:
+      slf4j:
+        whitelisted-mdc-keys: principal
+        enabled: true
+    baggage-keys: principal
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+    time-zone: Asia/Baku
+  kafka:
+    producer:
+      bootstrap-servers: ${KAFKA_HOST_NAME:localhost}:${KAFKA_PORT:9092}
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        acks: all
+        max.block.ms: 20000
+        delivery.timeout.ms: 30000
+        spring:
+          json:
+            add:
+              type:
+                headers: false
+    consumer:
+      bootstrap-servers: ${KAFKA_HOST_NAME:localhost}:${KAFKA_PORT:9092}
+      auto-offset-reset: earliest # Sleuth
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      properties:
+        spring:
+          json:
+            add:
+              type:
+                headers: false
+      group-id: ${KAFKA_GROUP:kafka-idempontancy}
+    admin:
+      properties:
+        bootstrap.servers: ${KAFKA_HOST_NAME:localhost}:${KAFKA_PORT:9092}
+management:
+  server:
+    port: ${MANAGEMENT_SERVER_PORT_CONSUMER:8081}
+  endpoints:
+    web:
+      exposure:
+        include: info, health
+    enabled-by-default: false
+  endpoint:
+    health:
+      show-details: always
+      enabled: true
+    metrics:
+      enabled: false
+    info:
+      enabled: true
+kafka:
+  topics:
+    test:
+      message-producer: message-producer
+
+
